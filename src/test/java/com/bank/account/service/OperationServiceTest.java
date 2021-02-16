@@ -29,6 +29,7 @@ public class OperationServiceTest {
                 .amount(100)
                 .allowNegativeAmount(false)
                 .negativeThreshold(0)
+                .positiveThreshold(500)
                 .build();
 
         Operation operation = Operation.builder()
@@ -43,12 +44,34 @@ public class OperationServiceTest {
     }
 
     @Test
+    public void should_not_add_deposit_operation_to_history_when_deposit_exceed_max_threshold() {
+        Account account = Account.builder()
+                .number("123445LO9")
+                .amount(10000)
+                .allowNegativeAmount(false)
+                .negativeThreshold(0)
+                .positiveThreshold(20000)
+                .build();
+
+        Operation operation = Operation.builder()
+                .account(account)
+                .description("New deposit")
+                .type(OperationType.DEPOSIT)
+                .amount(12000)
+                .build();
+
+        assertThatThrownBy(() -> operationService.addOperation(operation))
+                .isInstanceOf(RuntimeException.class).hasMessageContaining("123445LO9");
+    }
+
+    @Test
     public void should_add_withdraw_operation_to_history() {
         Account account = Account.builder()
                 .number("123445LO9")
                 .amount(100)
                 .allowNegativeAmount(false)
                 .negativeThreshold(0)
+                .positiveThreshold(1000)
                 .build();
 
         Operation operation = Operation.builder()
@@ -69,6 +92,7 @@ public class OperationServiceTest {
                 .amount(100)
                 .allowNegativeAmount(true)
                 .negativeThreshold(-200)
+                .positiveThreshold(1000)
                 .build();
 
         Operation operation = Operation.builder()
@@ -89,6 +113,7 @@ public class OperationServiceTest {
                 .amount(100)
                 .allowNegativeAmount(false)
                 .negativeThreshold(0)
+                .positiveThreshold(300)
                 .build();
 
         Operation operation = Operation.builder()
@@ -103,12 +128,27 @@ public class OperationServiceTest {
     }
 
     @Test
+    public void should_fail_when_no_statements_available() {
+        Account account = Account.builder()
+                .number("123445LO9")
+                .amount(100)
+                .allowNegativeAmount(false)
+                .negativeThreshold(0)
+                .positiveThreshold(100)
+                .build();
+
+        assertThatThrownBy(() -> operationService.getAccountStatement(account))
+                .isInstanceOf(RuntimeException.class).hasMessageContaining("123445LO9");
+    }
+
+    @Test
     public void should_be_able_to_get_account_statement(){
         Account account = Account.builder()
                 .number("123445LO9")
                 .amount(100)
                 .allowNegativeAmount(true)
                 .negativeThreshold(-200)
+                .positiveThreshold(1000)
                 .build();
 
         Operation operation1 = Operation.builder()
@@ -130,7 +170,9 @@ public class OperationServiceTest {
         LinkedList<SingleStatement> accountStatement = operationService.getAccountStatement(account);
         assertThat(accountStatement).hasSize(2);
         assertThat(accountStatement.getFirst().getOperation().getType()).isEqualTo(OperationType.DEPOSIT);
+        assertThat(accountStatement.getFirst().getBalance()).isEqualTo(600);
         assertThat(accountStatement.get(1).getOperation().getType()).isEqualTo(OperationType.WITHDRAW);
+        assertThat(accountStatement.get(1).getBalance()).isEqualTo(450);
     }
 
     @Test
@@ -140,6 +182,7 @@ public class OperationServiceTest {
                 .amount(100)
                 .allowNegativeAmount(true)
                 .negativeThreshold(-200)
+                .positiveThreshold(1000)
                 .build();
 
         Operation operation1 = Operation.builder()

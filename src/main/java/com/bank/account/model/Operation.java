@@ -1,6 +1,5 @@
 package com.bank.account.model;
 
-import com.google.common.base.Objects;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -21,13 +20,4 @@ public class Operation {
     private String description;
     private double amount;
     private OperationType type;
-
-    @Override
-    public String toString() {
-        return Objects.toStringHelper(this)
-                .add("type", type)
-                .add("date", date)
-                .add("amount", amount)
-                .toString();
-    }
 }

@@ -16,8 +16,8 @@ import java.util.UUID;
 public class Account {
     private final String id = UUID.randomUUID().toString();
     private String number;
-    private Client client;
     private double amount;
     private boolean allowNegativeAmount;
     private double negativeThreshold;
+    private double positiveThreshold;
 }

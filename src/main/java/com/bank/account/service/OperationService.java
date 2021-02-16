@@ -2,6 +2,7 @@ package com.bank.account.service;
 
 import com.bank.account.model.Account;
 import com.bank.account.model.Operation;
+import com.bank.account.model.OperationType;
 import com.bank.account.model.SingleStatement;
 import com.bank.account.repository.InMemoryRepository;
 import com.google.common.collect.Lists;
@@ -28,7 +29,7 @@ public class OperationService {
         }
         double overallAmount = account.getAmount() + newAmount;
 
-        if (!isOperationAllowed(account, overallAmount)) {
+        if (!isOperationAllowed(account, overallAmount, operation.getType())) {
             throw new RuntimeException(String.format("Unauthorized operation of %s on account : %s", newAmount, account.getNumber()));
         }
 
@@ -42,7 +43,7 @@ public class OperationService {
         }
         StringBuilder sb = new StringBuilder();
         sb.append("OPERATION | DATE | AMOUNT | BALANCE")
-        .append("\n");
+                .append("\n");
         accountStatements.forEach(singleStatement ->
                 sb.append(singleStatement.getOperation().getType())
                         .append(" | ")
@@ -50,7 +51,7 @@ public class OperationService {
                         .append(" | ")
                         .append(singleStatement.getOperation().getAmount())
                         .append(" | ")
-                        .append(singleStatement.getCurrentBalance())
+                        .append(singleStatement.getBalance())
                         .append("\n"));
         return sb.toString();
     }
@@ -58,7 +59,7 @@ public class OperationService {
     public LinkedList<SingleStatement> getAccountStatement(Account account) {
         LinkedList<SingleStatement> accountStatements = InMemoryRepository.IN_MEM_REPO.get(account);
         if (CollectionUtils.isEmpty(accountStatements)) {
-            throw new RuntimeException(String.format("No statements available, unknown account: %s", account.getNumber()));
+            throw new RuntimeException(String.format("No statements available for account: %s", account.getNumber()));
         }
         return accountStatements;
     }
@@ -67,7 +68,7 @@ public class OperationService {
         LinkedList<SingleStatement> accountStatements = InMemoryRepository.IN_MEM_REPO.get(account);
         SingleStatement statement = SingleStatement.builder()
                 .operation(operation)
-                .currentBalance(account.getAmount())
+                .balance(overallAmount)
                 .build();
         if (CollectionUtils.isEmpty(accountStatements)) {
             account.setAmount(overallAmount);
@@ -81,7 +82,14 @@ public class OperationService {
         }
     }
 
-    private boolean isOperationAllowed(Account account, double newAmount) {
-        return account.isAllowNegativeAmount() || newAmount >= account.getNegativeThreshold();
+    private boolean isOperationAllowed(Account account, double newAmount, OperationType operationType) {
+        switch (operationType) {
+            case DEPOSIT:
+                return newAmount <= account.getPositiveThreshold();
+            case WITHDRAW:
+                return account.isAllowNegativeAmount() || newAmount >= account.getNegativeThreshold();
+            default:
+                return false;
+        }
     }
 }
