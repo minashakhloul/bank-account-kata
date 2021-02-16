@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.util.LinkedList;
-import java.util.List;
 
 @Service
 public class OperationService {
@@ -36,8 +35,32 @@ public class OperationService {
         saveOperation(operation, account, overallAmount);
     }
 
-    public String printAccountStatement(Account account){
-       return null;
+    public String printAccountStatement(Account account) {
+        LinkedList<SingleStatement> accountStatements = InMemoryRepository.IN_MEM_REPO.get(account);
+        if (CollectionUtils.isEmpty(accountStatements)) {
+            throw new RuntimeException(String.format("No statements available, unknown account: %s", account.getNumber()));
+        }
+        StringBuilder sb = new StringBuilder();
+        sb.append("OPERATION | DATE | AMOUNT | BALANCE")
+        .append("\n");
+        accountStatements.forEach(singleStatement ->
+                sb.append(singleStatement.getOperation().getType())
+                        .append(" | ")
+                        .append(singleStatement.getOperation().getDate())
+                        .append(" | ")
+                        .append(singleStatement.getOperation().getAmount())
+                        .append(" | ")
+                        .append(singleStatement.getCurrentBalance())
+                        .append("\n"));
+        return sb.toString();
+    }
+
+    public LinkedList<SingleStatement> getAccountStatement(Account account) {
+        LinkedList<SingleStatement> accountStatements = InMemoryRepository.IN_MEM_REPO.get(account);
+        if (CollectionUtils.isEmpty(accountStatements)) {
+            throw new RuntimeException(String.format("No statements available, unknown account: %s", account.getNumber()));
+        }
+        return accountStatements;
     }
 
     private void saveOperation(Operation operation, Account account, double overallAmount) {
