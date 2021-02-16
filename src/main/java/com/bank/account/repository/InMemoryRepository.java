@@ -1,12 +1,12 @@
 package com.bank.account.repository;
 
 import com.bank.account.model.Account;
-import com.bank.account.model.Operation;
+import com.bank.account.model.SingleStatement;
 import com.google.common.collect.Maps;
 
-import java.util.List;
+import java.util.LinkedList;
 import java.util.Map;
 
 public interface InMemoryRepository {
-    Map<Account, List<Operation>> IN_MEM_REPO = Maps.newHashMap();
+    Map<Account, LinkedList<SingleStatement>> IN_MEM_REPO = Maps.newHashMap();
 }

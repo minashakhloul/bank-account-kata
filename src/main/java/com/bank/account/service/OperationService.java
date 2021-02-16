@@ -2,11 +2,13 @@ package com.bank.account.service;
 
 import com.bank.account.model.Account;
 import com.bank.account.model.Operation;
+import com.bank.account.model.SingleStatement;
 import com.bank.account.repository.InMemoryRepository;
 import com.google.common.collect.Lists;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import java.util.LinkedList;
 import java.util.List;
 
 @Service
@@ -34,15 +36,25 @@ public class OperationService {
         saveOperation(operation, account, overallAmount);
     }
 
+    public String printAccountStatement(Account account){
+       return null;
+    }
+
     private void saveOperation(Operation operation, Account account, double overallAmount) {
-        List<Operation> operations = InMemoryRepository.IN_MEM_REPO.get(account);
-        if (CollectionUtils.isEmpty(operations)) {
+        LinkedList<SingleStatement> accountStatements = InMemoryRepository.IN_MEM_REPO.get(account);
+        SingleStatement statement = SingleStatement.builder()
+                .operation(operation)
+                .currentBalance(account.getAmount())
+                .build();
+        if (CollectionUtils.isEmpty(accountStatements)) {
             account.setAmount(overallAmount);
-            InMemoryRepository.IN_MEM_REPO.put(account, Lists.newArrayList(operation));
+            LinkedList<SingleStatement> statements = Lists.newLinkedList();
+            statements.add(statement);
+            InMemoryRepository.IN_MEM_REPO.put(account, statements);
         } else {
             account.setAmount(overallAmount);
-            operations.add(operation);
-            InMemoryRepository.IN_MEM_REPO.put(account, operations);
+            accountStatements.add(statement);
+            InMemoryRepository.IN_MEM_REPO.put(account, accountStatements);
         }
     }
 

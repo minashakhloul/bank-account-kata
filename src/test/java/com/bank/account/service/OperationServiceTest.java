@@ -77,4 +77,34 @@ public class OperationServiceTest {
         operationService.addOperation(operation);
         assertThat(account.getAmount()).isEqualTo(-50);
     }
+
+    @Test
+    public void should_be_able_to_print_account_statement(){
+        Account account = Account.builder()
+                .number("123445LO9")
+                .amount(100)
+                .allowNegativeAmount(true)
+                .negativeThreshold(-200)
+                .build();
+
+        Operation operation1 = Operation.builder()
+                .account(account)
+                .description("New deposit")
+                .type(OperationType.DEPOSIT)
+                .amount(500)
+                .build();
+        operationService.addOperation(operation1);
+
+        Operation operation2 = Operation.builder()
+                .account(account)
+                .description("New withdraw")
+                .type(OperationType.WITHDRAW)
+                .amount(150)
+                .build();
+        operationService.addOperation(operation2);
+
+        String accountStatement = operationService.printAccountStatement(account);
+        assertThat(accountStatement).isNotNull();
+        assertThat(accountStatement).isNotEmpty();
+    }
 }
