@@ -35,4 +35,40 @@ public class OperationServiceTest {
         operationService.addOperation(operation);
         assertThat(account.getAmount()).isEqualTo(200);
     }
+
+    @Test
+    public void should_add_withdraw_operation_to_history() {
+        Account account = Account.builder()
+                .number("123445LO9")
+                .amount(100)
+                .build();
+
+        Operation operation = Operation.builder()
+                .account(account)
+                .description("New withdraw")
+                .type(OperationType.WITHDRAW)
+                .amount(60)
+                .build();
+
+        operationService.addOperation(operation);
+        assertThat(account.getAmount()).isEqualTo(40);
+    }
+
+    @Test
+    public void should_not_add_withdraw_operation_when_account_is_in_negative() {
+        Account account = Account.builder()
+                .number("123445LO9")
+                .amount(100)
+                .build();
+
+        Operation operation = Operation.builder()
+                .account(account)
+                .description("New withdraw")
+                .type(OperationType.WITHDRAW)
+                .amount(150)
+                .build();
+
+        operationService.addOperation(operation);
+        assertThat(account.getAmount()).isEqualTo(100);
+    }
 }
