@@ -15,8 +15,8 @@ import java.util.UUID;
 @Getter
 public class Operation {
     private final String id = UUID.randomUUID().toString();
-    private String accountId;
-    private Instant date;
+    private Account account;
+    private final Instant date = Instant.now();
     private String description;
     private double amount;
     private OperationType type;
