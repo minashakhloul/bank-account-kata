@@ -25,15 +25,28 @@ public class OperationService {
             default:
                 throw new IllegalArgumentException("Unknown operation type <" + operation.getType() + ">");
         }
+        double overallAmount = account.getAmount() + newAmount;
 
+        if (!isOperationAllowed(account, overallAmount)) {
+            throw new RuntimeException(String.format("Unauthorized operation of %s on account : %s", newAmount, account.getNumber()));
+        }
+
+        saveOperation(operation, account, overallAmount);
+    }
+
+    private void saveOperation(Operation operation, Account account, double overallAmount) {
         List<Operation> operations = InMemoryRepository.IN_MEM_REPO.get(account);
         if (CollectionUtils.isEmpty(operations)) {
-            account.setAmount(account.getAmount() + newAmount);
+            account.setAmount(overallAmount);
             InMemoryRepository.IN_MEM_REPO.put(account, Lists.newArrayList(operation));
         } else {
-            account.setAmount(account.getAmount() + newAmount);
+            account.setAmount(overallAmount);
             operations.add(operation);
             InMemoryRepository.IN_MEM_REPO.put(account, operations);
         }
+    }
+
+    private boolean isOperationAllowed(Account account, double newAmount) {
+        return account.isAllowNegativeAmount() || newAmount >= account.getNegativeThreshold();
     }
 }

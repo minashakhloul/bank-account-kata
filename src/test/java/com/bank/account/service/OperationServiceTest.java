@@ -23,6 +23,8 @@ public class OperationServiceTest {
         Account account = Account.builder()
                 .number("123445LO9")
                 .amount(100)
+                .allowNegativeAmount(false)
+                .negativeThreshold(0)
                 .build();
 
         Operation operation = Operation.builder()
@@ -41,6 +43,8 @@ public class OperationServiceTest {
         Account account = Account.builder()
                 .number("123445LO9")
                 .amount(100)
+                .allowNegativeAmount(false)
+                .negativeThreshold(0)
                 .build();
 
         Operation operation = Operation.builder()
@@ -59,6 +63,8 @@ public class OperationServiceTest {
         Account account = Account.builder()
                 .number("123445LO9")
                 .amount(100)
+                .allowNegativeAmount(true)
+                .negativeThreshold(-200)
                 .build();
 
         Operation operation = Operation.builder()
@@ -69,6 +75,6 @@ public class OperationServiceTest {
                 .build();
 
         operationService.addOperation(operation);
-        assertThat(account.getAmount()).isEqualTo(100);
+        assertThat(account.getAmount()).isEqualTo(-50);
     }
 }

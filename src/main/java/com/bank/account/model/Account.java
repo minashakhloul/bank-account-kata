@@ -18,4 +18,6 @@ public class Account {
     private String number;
     private Client client;
     private double amount;
+    private boolean allowNegativeAmount;
+    private double negativeThreshold;
 }
